@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -101,16 +101,6 @@ export default function App() {
   const [pressedItem, setPressedItem] = useState(null);
   const [languageModalVisible, setLanguageModalVisible] = useState(false);
   const [showAddressForm, setShowAddressForm] = useState(false);
-
-  useEffect(() => {
-    // Add a small delay before showing the address form when coming from Orders tab
-    if (currentScreen === 'settings') {
-      const timer = setTimeout(() => {
-        setShowAddressForm(true);
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [currentScreen]);
 
   const menuItems = [
     { icon: '🌐', title: 'Select Language' },
@@ -471,6 +461,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '600',
     color: '#000',
+    marginLeft: 8
   },
   subtitle: {
     fontSize: 16,

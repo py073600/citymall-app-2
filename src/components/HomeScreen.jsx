@@ -9,6 +9,7 @@ import {
   Image,
   SafeAreaView,
 } from 'react-native-web';
+import FashionHomeScreen from './FashionHomeScreen';
 
 const products = [
   {
@@ -52,6 +53,24 @@ const products = [
 const HomeScreen = ({ onOrdersPress }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('home');
+  const [hoveredCategory, setHoveredCategory] = useState(null);
+  const [showFashionHome, setShowFashionHome] = useState(false);
+
+  const rashanItems = [
+    'Groceries',
+    'Pulses',
+    'Rice',
+    'Cooking Oil',
+    'Spices',
+  ];
+
+  const fashionItems = [
+    'Clothing',
+    'Accessories',
+    'Home Decor',
+    'Kitchen Items',
+    'Furniture',
+  ];
 
   const handleTabPress = (tab) => {
     setActiveTab(tab);
@@ -59,6 +78,10 @@ const HomeScreen = ({ onOrdersPress }) => {
       onOrdersPress();
     }
   };
+
+  if (showFashionHome) {
+    return <FashionHomeScreen onBack={() => setShowFashionHome(false)} />;
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -68,23 +91,33 @@ const HomeScreen = ({ onOrdersPress }) => {
           
           <View style={styles.categories}>
             <TouchableOpacity 
-              style={styles.rashanBox}
+              style={[
+                styles.rashanBox,
+                hoveredCategory === 'rashan' && styles.hoveredCategory
+              ]}
               onPress={() => console.log('Rashan pressed')}
+              onMouseEnter={() => setHoveredCategory('rashan')}
+              onMouseLeave={() => setHoveredCategory(null)}
             >
               <Text style={styles.categoryText}>Rashan</Text>
               <Image 
-                source={{ uri: 'https://via.placeholder.com/100' }}
+                source={{ uri: 'https://via.placeholder.com/70' }}
                 style={styles.categoryImage}
               />
             </TouchableOpacity>
             
             <TouchableOpacity 
-              style={styles.fashionBox}
-              onPress={() => console.log('Fashion pressed')}
+              style={[
+                styles.fashionBox,
+                hoveredCategory === 'fashion' && styles.hoveredCategory
+              ]}
+              onPress={() => setShowFashionHome(true)}
+              onMouseEnter={() => setHoveredCategory('fashion')}
+              onMouseLeave={() => setHoveredCategory(null)}
             >
               <Text style={styles.categoryText}>Fashion & Home</Text>
               <Image 
-                source={{ uri: 'https://via.placeholder.com/100' }}
+                source={{ uri: 'https://via.placeholder.com/70' }}
                 style={styles.categoryImage}
               />
             </TouchableOpacity>
@@ -192,34 +225,46 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 16,
     gap: 16,
+    paddingHorizontal: '15%',
   },
   rashanBox: {
     flex: 1,
     backgroundColor: '#e91e63',
-    padding: 16,
+    padding: 10,
     borderRadius: 8,
     alignItems: 'center',
-    height: 100,
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    maxWidth: '40%',
+    aspectRatio: 1.3,
     justifyContent: 'center',
   },
   fashionBox: {
     flex: 1,
     backgroundColor: '#87CEEB',
-    padding: 16,
+    padding: 10,
     borderRadius: 8,
     alignItems: 'center',
-    height: 100,
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    maxWidth: '40%',
+    aspectRatio: 1.3,
     justifyContent: 'center',
   },
+  hoveredCategory: {
+    transform: [{scale: 1.05}],
+    boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+  },
   categoryText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000',
-    marginBottom: 8,
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 4,
+    textAlign: 'center',
   },
   categoryImage: {
-    width: 40,
-    height: 40,
+    width: 25,
+    height: 25,
     borderRadius: 4,
   },
   searchBar: {
