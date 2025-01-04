@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -8,20 +8,76 @@ import {
   TouchableOpacity,
   Image,
   SafeAreaView,
+  Dimensions
 } from 'react-native-web';
 
 const categories = [
-  { id: 1, name: "Men's", icon: '👔' },
-  { id: 2, name: "Women's", icon: '👗' },
-  { id: 3, name: 'Kids', icon: '👶' },
-  { id: 4, name: 'Footwear', icon: '👟' },
-  { id: 5, name: 'Western', icon: '🎭' },
-  { id: 6, name: 'Brand Store', icon: '🏪' },
-  { id: 7, name: 'Electronics', icon: '📱' },
-  { id: 8, name: 'Winter', icon: '🧥' },
-  { id: 9, name: 'Kitchen', icon: '🍳' },
-  { id: 10, name: 'Home', icon: '🏠' },
-  { id: 11, name: 'Decor', icon: '🎨' },
+  { 
+    id: 1, 
+    name: "Men's", 
+    icon: '👔',
+    image: 'https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?w=500&q=80'
+  },
+  { 
+    id: 2, 
+    name: "Women's", 
+    icon: '👗',
+    image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=500&q=80'
+  },
+  { 
+    id: 3, 
+    name: 'Kids', 
+    icon: '👶',
+    image: 'https://images.unsplash.com/photo-1534255536877-96d31c1a8f2e?w=500&q=80'
+  },
+  { 
+    id: 4, 
+    name: 'Footwear', 
+    icon: '👟',
+    image: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=500&q=80'
+  },
+  { 
+    id: 5, 
+    name: 'Western', 
+    icon: '🎭',
+    image: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=500&q=80'
+  },
+  { 
+    id: 6, 
+    name: 'Brand Store', 
+    icon: '🏪',
+    image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=500&q=80'
+  },
+  { 
+    id: 7, 
+    name: 'Electronics', 
+    icon: '📱',
+    image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=500&q=80'
+  },
+  { 
+    id: 8, 
+    name: 'Winter', 
+    icon: '🧥',
+    image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=500&q=80'
+  },
+  { 
+    id: 9, 
+    name: 'Kitchen', 
+    icon: '🍳',
+    image: 'https://images.unsplash.com/photo-1556909172-8c2f041fca1e?w=500&q=80'
+  },
+  { 
+    id: 10, 
+    name: 'Home', 
+    icon: '🏠',
+    image: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=500&q=80'
+  },
+  { 
+    id: 11, 
+    name: 'Decor', 
+    icon: '🎨',
+    image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=500&q=80'
+  },
 ];
 
 const deals = [
@@ -46,6 +102,35 @@ const deals = [
 ];
 
 const FashionHomeScreen = ({ onBack }) => {
+  const scrollViewRef = useRef(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const screenWidth = Dimensions.get('window').width;
+    const cardWidth = screenWidth * 0.8; // 80% of screen width
+    
+    const autoScroll = setInterval(() => {
+      if (scrollViewRef.current) {
+        const nextIndex = (currentIndex + 1) % categories.length;
+        scrollViewRef.current.scrollTo({
+          x: nextIndex * cardWidth,
+          animated: true
+        });
+        setCurrentIndex(nextIndex);
+      }
+    }, 3000); // Scroll every 3 seconds
+
+    return () => clearInterval(autoScroll);
+  }, [currentIndex]);
+
+  const handleScroll = (event) => {
+    const screenWidth = Dimensions.get('window').width;
+    const cardWidth = screenWidth * 0.8;
+    const offsetX = event.nativeEvent.contentOffset.x;
+    const index = Math.round(offsetX / cardWidth);
+    setCurrentIndex(index);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView}>
@@ -80,18 +165,42 @@ const FashionHomeScreen = ({ onBack }) => {
 
         {/* Categories Grid */}
         <View style={styles.categoriesGrid}>
-          {categories.map((category) => (
-            <TouchableOpacity 
-              key={category.id} 
-              style={styles.categoryItem}
-              onPress={() => console.log(`${category.name} pressed`)}
-            >
-              <View style={styles.categoryIconContainer}>
-                <Text style={styles.categoryIcon}>{category.icon}</Text>
-              </View>
-              <Text style={styles.categoryName}>{category.name}</Text>
-            </TouchableOpacity>
-          ))}
+          <ScrollView
+            ref={scrollViewRef}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            onScroll={handleScroll}
+            scrollEventThrottle={16}
+            contentContainerStyle={styles.scrollContent}
+          >
+            {categories.map((category, index) => (
+              <TouchableOpacity
+                key={category.id}
+                style={styles.categoryCard}
+                onPress={() => console.log(`${category.name} pressed`)}
+              >
+                <View style={styles.categoryImageContainer}>
+                  <Image
+                    source={{ uri: category.image }}
+                    style={styles.categoryImage}
+                  />
+                </View>
+                <Text style={styles.categoryName}>{category.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          <View style={styles.pagination}>
+            {categories.map((_, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.paginationDot,
+                  index === currentIndex && styles.paginationDotActive
+                ]}
+              />
+            ))}
+          </View>
         </View>
 
         {/* Hot Deals Section */}
@@ -206,31 +315,66 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   categoriesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
     padding: 16,
-    justifyContent: 'space-between',
   },
-  categoryItem: {
-    width: '20%',
-    alignItems: 'center',
-    marginBottom: 20,
+  scrollContent: {
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    gap: 15,
   },
-  categoryIconContainer: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#f0f0f0',
+  categoryCard: {
     alignItems: 'center',
+    marginHorizontal: 8,
+    width: 80,
+  },
+  categoryImageContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
     justifyContent: 'center',
-    marginBottom: 8,
+    alignItems: 'center',
   },
-  categoryIcon: {
-    fontSize: 24,
+  categoryImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+    backgroundColor: '#f5f5f5',
   },
   categoryName: {
     fontSize: 12,
+    fontWeight: '600',
+    color: '#000',
+    marginTop: 8,
     textAlign: 'center',
+  },
+  pagination: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
+  paginationDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#ccc',
+    marginHorizontal: 4,
+  },
+  paginationDotActive: {
+    backgroundColor: '#FFE44D',
+    width: 12,
+    height: 12,
+    borderRadius: 6,
   },
   dealsSection: {
     padding: 16,
