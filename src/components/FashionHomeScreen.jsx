@@ -49,11 +49,20 @@ const FashionHomeScreen = ({ onBack }) => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView}>
-        {/* Header */}
+        {/* Header with Back Button */}
         <View style={styles.header}>
+          <TouchableOpacity 
+            onPress={onBack}
+            style={styles.backButton}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.backButtonText}>←</Text>
+          </TouchableOpacity>
           <Text style={styles.headerText}>Low Prices • More Saving</Text>
-          
-          {/* Search Bar */}
+        </View>
+
+        {/* Search Section */}
+        <View style={styles.searchSection}>
           <View style={styles.searchBar}>
             <TextInput
               style={styles.searchInput}
@@ -147,26 +156,47 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 16,
+    paddingTop: 20,
     backgroundColor: '#FFE44D',
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 60,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  backButtonText: {
+    fontSize: 24,
+    color: '#333',
   },
   headerText: {
-    fontSize: 20,
+    fontSize: 19,
     fontWeight: 'bold',
-    marginBottom: 16,
+    marginLeft: 8,
+    flex: 1,
+  },
+  searchSection: {
+    padding: 16,
+    backgroundColor: '#fff',
   },
   searchBar: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderRadius: 25,
-    padding: 8,
     alignItems: 'center',
-    marginBottom: 8,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+    padding: 8,
+    marginTop: 8,
   },
   searchInput: {
     flex: 1,
-    marginLeft: 8,
+    height: 40,
+    paddingHorizontal: 8,
     fontSize: 16,
   },
   searchIcon: {

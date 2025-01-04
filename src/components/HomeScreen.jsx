@@ -10,6 +10,7 @@ import {
   SafeAreaView,
 } from 'react-native-web';
 import FashionHomeScreen from './FashionHomeScreen';
+import CategoryScreen from './CategoryScreen';
 
 const products = [
   {
@@ -55,6 +56,7 @@ const HomeScreen = ({ onOrdersPress }) => {
   const [activeTab, setActiveTab] = useState('home');
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const [showFashionHome, setShowFashionHome] = useState(false);
+  const [showCategories, setShowCategories] = useState(false);
 
   const rashanItems = [
     'Groceries',
@@ -76,11 +78,17 @@ const HomeScreen = ({ onOrdersPress }) => {
     setActiveTab(tab);
     if (tab === 'orders') {
       onOrdersPress();
+    } else if (tab === 'category') {
+      setShowCategories(true);
     }
   };
 
   if (showFashionHome) {
     return <FashionHomeScreen onBack={() => setShowFashionHome(false)} />;
+  }
+
+  if (showCategories) {
+    return <CategoryScreen onBack={() => setShowCategories(false)} />;
   }
 
   return (
