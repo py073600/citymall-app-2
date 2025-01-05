@@ -8,6 +8,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./citymall-build
     steps:
       - name: 🏗 Setup repo
         uses: actions/checkout@v3
@@ -25,16 +28,12 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: 📦 Install dependencies
-        working-directory: ./citymall-build
         run: |
           npm install
           npm install -g eas-cli
 
       - name: 🚀 Build APK
-        working-directory: ./citymall-build
-        run: |
-          cd citymall-build
-          eas build --platform android --profile preview --non-interactive
+        run: eas build --platform android --profile preview --non-interactive
 
       - name: 📱 Upload APK
         uses: actions/upload-artifact@v3
