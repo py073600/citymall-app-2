@@ -1,0 +1,16 @@
+node_modules/*
+/build/
+/dist/
+/public/
+/.next/
+/.expo/
+/.expo-shared/
+/.expo-staging/
+/.expo-staging-shared/
+/.expo-internal/
+/.expo-internal-shared/
+/.expo-internal-staging/
+/.expo-internal-staging-shared/
+/.expo-internal-staging-shared/
+/.expo-internal-staging-shared/
+/.expo-internal-staging-shared/ 
