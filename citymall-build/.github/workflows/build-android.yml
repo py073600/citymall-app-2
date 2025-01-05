@@ -25,11 +25,16 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: 📦 Install dependencies
-        run: npm install
+        working-directory: ./citymall-build
+        run: |
+          npm install
+          npm install -g eas-cli
 
       - name: 🚀 Build APK
         working-directory: ./citymall-build
-        run: eas build --platform android --profile preview --non-interactive
+        run: |
+          cd citymall-build
+          eas build --platform android --profile preview --non-interactive
 
       - name: 📱 Upload APK
         uses: actions/upload-artifact@v3
