@@ -101,6 +101,71 @@ const deals = [
   },
 ];
 
+// Section configurations
+const generateProducts = (category, startId) => {
+  const products = [];
+  const winterImages = [
+    'https://images.unsplash.com/photo-1515434126000-961d90ff09db?w=400&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1516762689617-e1cffcef479d?w=400&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1578587018452-892bacefd3f2?w=400&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1578948856697-db91d246b7b8?w=400&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1580657018950-c7f7d6a6d990?w=400&h=400&fit=crop'
+  ];
+  
+  const types = {
+    winter: [
+      'Winter Jacket', 'Puffer Coat', 'Wool Sweater', 'Thermal Set', 'Snow Boots',
+      'Beanie Hat', 'Muffler Scarf', 'Gloves', 'Woolen Socks', 'Fleece Pullover',
+      'Down Jacket', 'Cardigan', 'Turtleneck', 'Winter Pants', 'Ear Muffs',
+      'Neck Warmer', 'Boot Socks', 'Wool Cap', 'Hooded Jacket', 'Shawl',
+      'Mittens', 'Leg Warmers', 'Winter Boots', 'Wool Blazer', 'Thermal Jacket'
+    ],
+    essentials: [
+      'Basic Tee', 'Denim Jeans', 'Sweater', 'Hoodie', 'Jacket',
+      'Socks', 'Underwear', 'Tank Top', 'Shorts', 'Pajamas',
+      'Track Pants', 'Sweatshirt', 'Polo Shirt', 'Casual Shirt', 'Formal Shirt',
+      'Blazer', 'Trousers', 'Chinos', 'Cardigan', 'Vest',
+      'Belt', 'Scarf', 'Cap', 'Gloves', 'Handkerchief'
+    ],
+    jackets: [
+      'Bomber Jacket', 'Leather Jacket', 'Denim Jacket', 'Puffer Jacket', 'Windbreaker',
+      'Blazer', 'Sport Jacket', 'Varsity Jacket', 'Motorcycle Jacket', 'Rain Jacket',
+      'Field Jacket', 'Track Jacket', 'Quilted Jacket', 'Fleece Jacket', 'Hooded Jacket',
+      'Down Jacket', 'Fur Jacket', 'Utility Jacket', 'Trucker Jacket', 'Parka',
+      'Peacoat', 'Trench Coat', 'Overcoat', 'Anorak', 'Ski Jacket'
+    ],
+    accessories: [
+      'Scarf', 'Gloves', 'Beanie', 'Belt', 'Watch',
+      'Sunglasses', 'Wallet', 'Bag', 'Hat', 'Socks',
+      'Tie', 'Bow Tie', 'Pocket Square', 'Cufflinks', 'Bracelet',
+      'Necklace', 'Ring', 'Earrings', 'Hair Accessories', 'Phone Case',
+      'Keychain', 'Umbrella', 'Backpack', 'Laptop Bag', 'Travel Bag'
+    ]
+  };
+
+  const categoryTypes = types[category] || types.winter;
+  
+  for (let i = 0; i < 25; i++) {
+    products.push({
+      id: startId + i,
+      name: categoryTypes[i],
+      price: `₹${Math.floor(Math.random() * 2000) + 499}`,
+      originalPrice: `₹${Math.floor(Math.random() * 3000) + 999}`,
+      discount: `${Math.floor(Math.random() * 50) + 20}% OFF`,
+      image: winterImages[i % winterImages.length],
+      category: category
+    });
+  }
+  return products;
+};
+
+const winterSections = [
+  { title: '🔥 Hot Winter Deals', color: '#FF4081', type: 'winter', products: generateProducts('winter', 0) },
+  { title: '❄️ Winter Essentials', color: '#2196F3', type: 'essentials', products: generateProducts('essentials', 25) },
+  { title: '🧥 Trendy Jackets', color: '#4CAF50', type: 'jackets', products: generateProducts('jackets', 50) },
+  { title: '🧣 Warm Accessories', color: '#FF9800', type: 'accessories', products: generateProducts('accessories', 75) }
+];
+
 const FashionHomeScreen = ({ onBack }) => {
   const scrollViewRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -229,6 +294,40 @@ const FashionHomeScreen = ({ onBack }) => {
             ))}
           </ScrollView>
         </View>
+
+        {/* Winter Sections */}
+        {winterSections.map((section, index) => (
+          <View key={section.title} style={[styles.dealsSection, { backgroundColor: section.color + '10' }]}>
+            <View style={[styles.dealsBanner, { backgroundColor: section.color }]}>
+              <Text style={styles.dealsTitle}>{section.title}</Text>
+              <TouchableOpacity style={styles.viewAllButton}>
+                <Text style={[styles.viewAllText, { color: section.color }]}>View All</Text>
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              style={styles.dealsScroll}
+            >
+              {section.products.map((product) => (
+                <View key={`${section.type}-${product.id}`} style={[styles.dealCard, { borderColor: section.color + '30' }]}>
+                  <Image source={{ uri: product.image }} style={styles.dealImage} />
+                  <View style={styles.dealInfo}>
+                    <Text style={styles.dealName}>{product.name}</Text>
+                    <View style={styles.priceRow}>
+                      <Text style={[styles.dealPrice, { color: section.color }]}>{product.price}</Text>
+                      <Text style={styles.originalPrice}>{product.originalPrice}</Text>
+                    </View>
+                    <Text style={[styles.discount, { backgroundColor: section.color + '20', color: section.color }]}>
+                      {product.discount}
+                    </Text>
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        ))}
       </ScrollView>
 
       {/* Bottom Navigation */}
@@ -470,6 +569,28 @@ const styles = StyleSheet.create({
   },
   navText: {
     fontSize: 12,
+  },
+  dealInfo: {
+    padding: 8,
+  },
+  priceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  originalPrice: {
+    fontSize: 12,
+    color: '#666',
+    textDecorationLine: 'line-through',
+    marginLeft: 8,
+  },
+  discount: {
+    fontSize: 12,
+    color: '#fff',
+    padding: 4,
+    borderRadius: 4,
+    position: 'absolute',
+    top: 8,
+    right: 8,
   },
 });
 

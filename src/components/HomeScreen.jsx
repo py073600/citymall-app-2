@@ -9,6 +9,8 @@ import {
   Image,
   SafeAreaView,
   Dimensions,
+  Alert,
+  Pressable,
 } from 'react-native-web';
 import FashionHomeScreen from './FashionHomeScreen';
 import CategoryScreen from './CategoryScreen';
@@ -20,12 +22,12 @@ const products = Array(15).fill().map((_, index) => ({
   price: Math.floor(Math.random() * 500) + 100,
   originalPrice: Math.floor(Math.random() * 1000) + 500,
   discount: `${Math.floor(Math.random() * 50) + 10}%`,
-  image: 'https://via.placeholder.com/150',
+  image: index === 1 ? 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop' : 'https://via.placeholder.com/150',
 }));
 
 const orderAgainItems = [
   { id: 1, name: 'Fortune Oil', price: '₹110', image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&h=400&fit=crop' },
-  { id: 2, name: 'Tata Salt', price: '₹20', image: 'https://images.unsplash.com/photo-1551966775-a4ddc8912584?w=400&h=400&fit=crop' },
+  { id: 2, name: 'Tata Salt', price: '₹20', image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop' },
   { id: 3, name: 'Maggi', price: '₹14', image: 'https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=400&h=400&fit=crop' },
   { id: 4, name: 'Surf Excel', price: '₹85', image: 'https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?w=400&h=400&fit=crop' },
   { id: 5, name: 'Aashirvaad Atta', price: '₹325', image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=400&fit=crop' },
@@ -52,13 +54,16 @@ const orderAgainSections = Array(20).fill().map((_, index) => ({
   products: orderAgainItems,
 }));
 
-const HomeScreen = ({ onOrdersPress }) => {
+const HomeScreen = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = React.useState('');
   const [activeTab, setActiveTab] = React.useState('home');
   const [hoveredCategory, setHoveredCategory] = React.useState(null);
   const [showFashionHome, setShowFashionHome] = React.useState(false);
   const [showCategories, setShowCategories] = React.useState(false);
   const [windowWidth, setWindowWidth] = React.useState(Dimensions.get('window').width);
+  const [tabPosition, setTabPosition] = React.useState({ top: 350, left: 20 });
+  const [isDragging, setIsDragging] = React.useState(false);
+  const [lastTap, setLastTap] = React.useState(0);
 
   React.useEffect(() => {
     const handleResize = () => {
@@ -121,10 +126,55 @@ const HomeScreen = ({ onOrdersPress }) => {
   const handleTabPress = (tab) => {
     setActiveTab(tab);
     if (tab === 'orders') {
-      onOrdersPress();
+      navigation.navigate('Orders');
     } else if (tab === 'category') {
       setShowCategories(true);
     }
+  };
+
+  const handleTabMove = (event) => {
+    if (isDragging) {
+      const { pageY } = event.nativeEvent;
+      setTabPosition(prev => ({
+        ...prev,
+        top: Math.max(100, Math.min(pageY - 30, Dimensions.get('window').height - 100))
+      }));
+    }
+  };
+
+  const handleResponderRelease = (event) => {
+    setIsDragging(false);
+    if (Math.abs(event.nativeEvent.pageY - tabPosition.top) < 5) {
+      // If there was minimal movement, treat it as a tap
+      handleFloatingTabPress();
+    }
+  };
+
+  const handleFloatingTabPress = () => {
+    const now = Date.now();
+    if (now - lastTap < 300) {
+      // Double tap detected
+      Alert.alert('Double Tap!', 'You double tapped the floating button');
+    } else {
+      // Single tap
+      Alert.alert('Quick Actions', 'Choose an action:', [
+        {
+          text: 'Go to Cart',
+          onPress: () => navigation.navigate('Cart')
+        },
+        {
+          text: 'Search',
+          onPress: () => {
+            // Handle search action
+          }
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel'
+        }
+      ]);
+    }
+    setLastTap(now);
   };
 
   if (showFashionHome) {
@@ -136,35 +186,44 @@ const HomeScreen = ({ onOrdersPress }) => {
   }
 
   return (
-    <SafeAreaView style={[styles.container, responsiveStyles.container]}>
-      <View style={styles.fixedHeader}>
-        <Text style={[styles.deliveryText, { fontSize: responsiveStyles.headerText.fontSize }]}>
-          Delivery by 8th January
-        </Text>
-        
-        <View style={[styles.searchBar, responsiveStyles.searchBar]}>
-          <TextInput
-            style={[styles.searchInput, { 
-              fontSize: 14,
-              height: responsiveStyles.searchBar.height,
-            }]}
-            placeholder='Search "Knorr Soup"'
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-          <TouchableOpacity style={styles.searchIcon}>
-            <Text>🔍</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.micIcon}>
-            <Text>🎤</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
+    <SafeAreaView style={styles.container}>
       <ScrollView 
         style={styles.scrollView}
-        contentContainerStyle={styles.contentContainer}
+        onScroll={(e) => {
+          if (!isDragging) {
+            const offset = e.nativeEvent.contentOffset.y;
+            setTabPosition(prev => ({
+              ...prev,
+              top: Math.max(350 + offset, 100)
+            }));
+          }
+        }}
+        scrollEventThrottle={16}
       >
+        <View style={styles.fixedHeader}>
+          <Text style={[styles.deliveryText, { fontSize: responsiveStyles.headerText.fontSize }]}>
+            Delivery by 8th January
+          </Text>
+          
+          <View style={[styles.searchBar, responsiveStyles.searchBar]}>
+            <TextInput
+              style={[styles.searchInput, { 
+                fontSize: 14,
+                height: responsiveStyles.searchBar.height,
+              }]}
+              placeholder='Search "Knorr Soup"'
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+            <TouchableOpacity style={styles.searchIcon}>
+              <Text>🔍</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.micIcon}>
+              <Text>🎤</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         <View style={styles.stickyHeader}>
           <View style={styles.categoryTabsContainer}>
             <TouchableOpacity 
@@ -306,6 +365,32 @@ const HomeScreen = ({ onOrdersPress }) => {
           <Text style={[styles.navText, activeTab === 'orders' && styles.activeNavText]}>Orders</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Draggable Floating Tab */}
+      <TouchableOpacity
+        activeOpacity={0.8}
+        onPress={handleFloatingTabPress}
+        style={[
+          styles.floatingTab,
+          {
+            top: tabPosition.top,
+            left: tabPosition.left,
+          }
+        ]}
+      >
+        <Pressable
+          onStartShouldSetResponder={() => true}
+          onResponderGrant={() => setIsDragging(true)}
+          onResponderMove={handleTabMove}
+          onResponderRelease={handleResponderRelease}
+          style={styles.dragHandle}
+        >
+          <Image 
+            source={{ uri: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&h=200&fit=crop' }} 
+            style={styles.floatingImage} 
+          />
+        </Pressable>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -555,6 +640,46 @@ const styles = StyleSheet.create({
   },
   activeNavText: {
     color: '#e91e63',
+  },
+  floatingTab: {
+    position: 'absolute',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#fff',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.30,
+    shadowRadius: 4.65,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000,
+  },
+  floatingImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+  },
+  dragHandle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#fff',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.30,
+    shadowRadius: 4.65,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000,
   },
 });
 
