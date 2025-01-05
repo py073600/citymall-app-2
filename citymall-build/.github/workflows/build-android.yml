@@ -28,6 +28,7 @@ jobs:
         run: npm install
 
       - name: 🚀 Build APK
+        working-directory: ./citymall-build
         run: eas build --platform android --profile preview --non-interactive
 
       - name: 📱 Upload APK
