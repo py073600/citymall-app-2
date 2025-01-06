@@ -10,7 +10,7 @@ jobs:
     name: Create Android Build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Check out repository
         uses: actions/checkout@v3
 
       - name: Setup Node
@@ -19,16 +19,41 @@ jobs:
           node-version: 18.x
           cache: npm
 
-      - name: Setup Expo and EAS
+      - name: Setup Expo
         uses: expo/expo-github-action@v8
         with:
           eas-version: latest
+          expo-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Install dependencies
-        working-directory: ./citymall-build
-        run: npm install
+        run: |
+          cd citymall-build
+          npm install
 
-      - name: Build Android
-        working-directory: ./citymall-build
-        run: npx eas-cli build --platform android --profile preview --non-interactive
+      - name: Configure EAS
+        run: |
+          cd citymall-build
+          echo '{
+            "cli": {
+              "version": ">= 5.9.1"
+            },
+            "build": {
+              "development": {
+                "developmentClient": true,
+                "distribution": "internal"
+              },
+              "preview": {
+                "distribution": "internal",
+                "android": {
+                  "buildType": "apk"
+                }
+              },
+              "production": {}
+            }
+          }' > eas.json
+
+      - name: Build Android APK
+        run: |
+          cd citymall-build
+          npx eas-cli build --platform android --profile preview --non-interactive
